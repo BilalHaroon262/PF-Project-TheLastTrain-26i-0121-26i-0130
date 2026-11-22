@@ -114,23 +114,3 @@ bool removeItem(char inventory[MAX_INVENTORY_CAPACITY], int& inventoryCount, cha
     inventoryCount = inventoryCount - 1;
     return true;
 }
-
-        
-        
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-    
-
