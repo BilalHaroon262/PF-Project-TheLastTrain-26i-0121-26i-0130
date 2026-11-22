@@ -55,8 +55,79 @@ if (fromR == 4 && toR == 4) {
     }
     return false;
 }
+bool canTraverse(int targetFloor, int targetRoom, char connType, const char inventory[MAX_INVENTORY_CAPACITY], int inventoryCount,
+                 int emergencyTripsLeft, bool lift2Operational) {
+                    if (targetFloor < 1 || targetFloor > NUM_FLOORS || targetRoom < 1 || targetRoom > ROOMS_PER_FLOOR) {
+                        return false; }
+                    switch (connType) {
+                        case CONN_DOOR:
+                        case CONN_WINDOW:
+                        case '1':
+                            return true;
+                        case CONN_LOCKED_DOOR:
+                            return unlockFloor3Door(inventory,inventoryCount);
+                        case '2': {
+                            bool pass = lift2Operational && hasItem(inventory,inventoryCount,ENT_LIFT_PASS);
+                            bool backup  = (emergencyTripsLeft > 0) && hasItem(inventory,inventoryCount,ENT_EMERGENCY_CARD);
+                            return (pass || backup); }
+                        default:
+                            return false; }
+                        }
+void applyResourceDelta(int& energy, int& time, int deltaEnergy, int deltaTime) {
+    energy = clampInt(energy+deltaEnergy,0,MAX_ENERGY);
+    time = clampInt(time+deltaTime,0,MAX_TIME);
+}
+void applyScoreDelta(int& score, int deltaScore) {
+    int updated = score + deltaScore;
+    score = (updated < 0) ? 0 : updated;
+}
+bool hasItem(const char inventory[MAX_INVENTORY_CAPACITY], int inventoryCount, char itemSymbol) {
+    if (inventoryCount < 0 || inventoryCount > MAX_INVENTORY_CAPACITY) {
+        return false; }
+    for (int i = 0; i < inventoryCount; i++) {
+    if (inventory[i] == itemSymbol)
+        return true;
+    }
+        return false;
+}
+bool addItem(char inventory[MAX_INVENTORY_CAPACITY], int& inventoryCount, char itemSymbol) {
+    if (inventoryCount < 0 || inventoryCount >= MAX_INVENTORY_CAPACITY) {
+    return false; }
+    *(inventory + inventoryCount) = itemSymbol;
+    inventoryCount += 1;
+    return true;
+}
+bool removeItem(char inventory[MAX_INVENTORY_CAPACITY], int& inventoryCount, char itemSymbol) {
+    if (inventoryCount < 0 || inventoryCount > MAX_INVENTORY_CAPACITY) {
+    return false; }
+    int foundPos = -1;
+    for (int i = 0; i < inventoryCount; i++) {
+       if (inventory[i] == itemSymbol) {
+              foundPos = i;
+                break; }
+       }
+    if (foundPos == -1) {
+        return false; }
+    for (int k = foundPos; k < inventoryCount - 1; k++) {
+          inventory[k] = inventory[k + 1]; }
+    inventory[inventoryCount - 1] = ENT_NONE;
+    inventoryCount = inventoryCount - 1;
+    return true;
+}
 
         
+        
+
+
+
+
+
+        
+
+
+
+
+
 
 
 
