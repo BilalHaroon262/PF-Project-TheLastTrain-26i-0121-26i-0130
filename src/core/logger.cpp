@@ -39,7 +39,7 @@ bool saveGameStateToFile(const char* filename,
         for (int r = 0; r < ROOMS_PER_FLOOR; r++) {
             int count = clampInt(entityCounts[f][r],0,MAX_ENTITIES_PER_ROOM);
             out << "CELL " << (f + 1) << " " << (r + 1) << " " << count;
-            for (int e = 0; e < count && e < MAX_ENTITIES_PER_ROOM; e++) {
+            for (int e = 0; e < count; e++) {
                 out << " " << roomEntities[f][r][e]; }
             out << endl;
         } 
@@ -100,13 +100,41 @@ bool loadGameStateFromFile(const char* filename,
             }
         }
         in.close();
-        return !in.fail();
+        return true;
 }
 void writeGameSummaryReport(const char* filename,
                             int score, int remainingEnergy, int remainingTime,
                             const bool objectives[NUM_OBJECTIVES], bool victory) {
     if (!filename) {
-
+        return; }
+    ofstream rep(filename);
+    if (!rep.is_open()) {
+        return; }
+    rep << setfill('*') << setw(52) << "" << endl;
+    rep << setfill(' ')<< setw(35) << "SESSION AUDIT LOG" << endl;
+    rep << "Mission Outcome : " << (victory ? "VICTORY" : "DEFEAT") << endl;
+    rep << "Total Score : " << score << " / 520" << endl;
+    rep << "Energy Balance : " << remainingEnergy << " / " << MAX_ENERGY << endl;
+    rep << "Time Remaining : " << remainingTime << endl;
+    rep << "Objectives Audit:" << endl;
+    rep << "Master Key (<) : " << (objectives[OBJ_MASTER_KEY] ? "DONE (+10)"  : "MISS") << endl;
+    rep << "Clue 4 (F3-R2) : " << (objectives[OBJ_CLUE_4] ? "DONE (+10)" : "MISS") << endl;
+    rep << "Clue 2 (F4-R3) : " << (objectives[OBJ_CLUE_2] ? "DONE (+10)" : "MISS") << endl;
+    rep << "Clue 7 (F5-R1) : " << (objectives[OBJ_CLUE_7] ? "DONE (+10)" : "MISS") << endl;
+    rep << "Cabinet Unlocked (427) : " << (objectives[OBJ_CABINET_UNLOCKED] ? "DONE (+30)" : "MISS") << endl;
+    rep << "Train Key Acquired (^) : " << (objectives[OBJ_TRAIN_KEY] ? "DONE (+10)" : "MISS") << endl;
+    rep << "Fuse Picked Up (*) : " << (objectives[OBJ_FUSE_COLLECTED] ? "DONE" : "MISS") << endl;
+    rep << "Fuse Installed (F3-R4) : " << (objectives[OBJ_FUSE_INSTALLED] ? "DONE (+20)" : "MISS") << endl;
+    rep << "Lift Pass Collected (() : " << (objectives[OBJ_LIFT_PASS] ? "DONE (+20)" : "MISS") << endl;
+    rep << "Lift 2 Operational : " << (objectives[OBJ_LIFT2_ACTIVE] ? "DONE" : "MISS") << endl;
+    rep << "Passenger Rescued (!) : " << (objectives[OBJ_PASSENGER_RESCUED] ? "DONE (+100)" : "MISS") << endl;
+    rep << "Cat Carrier Picked Up (@): " << (objectives[OBJ_CAT_CARRIER] ? "DONE" : "MISS") << endl;
+    rep << "Cat Secured (~) : " << (objectives[OBJ_CAT_SECURED] ? "DONE (+100)" : "MISS") << endl;
+    rep << "Train Prepared (F5-R2) : " << (objectives[OBJ_TRAIN_PREPARED] ? "DONE (+100)" : "MISS") << endl;
+    rep << "Full Mission Victory : " << (objectives[OBJ_MISSION_WON] ? "DONE (+100)" : "MISS") << endl;
+    rep << setfill('*') << setw(52) << "" << endl;
+    rep.close();
+}
 
         
 
