@@ -16,36 +16,36 @@ bool saveGameStateToFile(const char* filename,
                          const int entityCounts[NUM_FLOORS][ROOMS_PER_FLOOR]) {
     if (!filename) {
         return false; }
-    ofstream out (filename);
-    if (!out.is_open()) {
+    ofstream write (filename);
+    if (!write.is_open()) {
         return false; }
-    out << "STATE_FLOOR " << playerFloor << endl;
-    out << "STATE_ROOM " << playerRoom << endl;
-    out << "STATE_ENERGY " << energy << endl;
-    out << "STATE_TIME " << time << endl;
-    out << "STATE_SCORE " << score << endl;
-    out << "STATE_TRIPS " << emergencyTripsLeft << endl;
+    write << "STATE_FLOOR " << playerFloor << endl;
+    write << "STATE_ROOM " << playerRoom << endl;
+    write << "STATE_ENERGY " << energy << endl;
+    write << "STATE_TIME " << time << endl;
+    write << "STATE_SCORE " << score << endl;
+    write << "STATE_TRIPS " << emergencyTripsLeft << endl;
     int safeCount = clampInt(inventoryCount,0,MAX_INVENTORY_CAPACITY);
-    out << "BAG_SIZE " << safeCount << endl;
-    out << "BAG_ITEMS";
+    write << "BAG_SIZE " << safeCount << endl;
+    write << "BAG_ITEMS";
     for (int i = 0; i < safeCount; i++) {
-        out << " " << inventory[i]; }
-    out << endl;
-    out << "FLAGS";
+        write << " " << inventory[i]; }
+    write << endl;
+    write << "FLAGS";
     for (int j = 0; j < NUM_OBJECTIVES; j++) {
-        out << " " << (objectives[j] ? 1 : 0); }
-    out << endl;
+        write << " " << (objectives[j] ? 1 : 0); }
+    write << endl;
     for (int f = 0; f < NUM_FLOORS; f++) {
         for (int r = 0; r < ROOMS_PER_FLOOR; r++) {
             int count = clampInt(entityCounts[f][r],0,MAX_ENTITIES_PER_ROOM);
-            out << "CELL " << (f + 1) << " " << (r + 1) << " " << count;
+            write << "CELL " << (f + 1) << " " << (r + 1) << " " << count;
             for (int e = 0; e < count; e++) {
-                out << " " << roomEntities[f][r][e]; }
-            out << endl;
+                write << " " << roomEntities[f][r][e]; }
+            write << endl;
         } 
     }
-    out.close();
-    return !out.fail();
+    write.close();
+    return !write.fail();
 }
 bool loadGameStateFromFile(const char* filename,
                            int& playerFloor, int& playerRoom,
@@ -56,50 +56,50 @@ bool loadGameStateFromFile(const char* filename,
                            int entityCounts[NUM_FLOORS][ROOMS_PER_FLOOR]) {
     if (!filename) {
         return false; }
-    ifstream in (filename);
-    if (!in.is_open()) {
+    ifstream read (filename);
+    if (!read.is_open()) {
         return false; }
     char tag[MAX_LINE_LEN];
-    while (in >> setw(MAX_LINE_LEN) >> tag) {
+    while (read >> setw(MAX_LINE_LEN) >> tag) {
         if (stringEquals(tag,"STATE_FLOOR")) {
-            in >> playerFloor; }
+            read >> playerFloor; }
         else if (stringEquals(tag,"STATE_ROOM")) {
-            in >> playerRoom; }
+            read >> playerRoom; }
         else if (stringEquals(tag,"STATE_ENERGY")) {
-            in >> energy; }
+            read >> energy; }
         else if (stringEquals(tag,"STATE_TIME")) {
-            in >> time; }
+            read >> time; }
         else if (stringEquals(tag,"STATE_SCORE")) {
-            in >> score; }
+            read >> score; }
         else if (stringEquals(tag,"STATE_TRIPS")) {
-            in >> emergencyTripsLeft; }
+            read >> emergencyTripsLeft; }
         else if (stringEquals(tag,"BAG_SIZE")) {
-            in >> inventoryCount;
+            read >> inventoryCount;
             inventoryCount = clampInt(inventoryCount,0,MAX_INVENTORY_CAPACITY); }
         else if (stringEquals(tag, "BAG_ITEMS")) {
             for (int i = 0; i < MAX_INVENTORY_CAPACITY; i++)
                 inventory[i] = ENT_NONE;
             for (int i = 0; i < inventoryCount; i++) 
-                in >> inventory[i]; }
+                read >> inventory[i]; }
         else if (stringEquals(tag,"FLAGS")) {
             for (int j = 0; j < NUM_OBJECTIVES; j++) {
                 int v = 0;
-                in >> v;
+                read >> v;
                 objectives[j] = (v == 1); } 
             }
         else if (stringEquals(tag,"CELL")) {
             int fl=0, rm=0, n=0;
-            in >> fl >> rm >> n;
+            read >> fl >> rm >> n;
             if (fl >= 1 && fl <= NUM_FLOORS && rm >= 1 && rm <= ROOMS_PER_FLOOR) {
                 n = clampInt(n,0,MAX_ENTITIES_PER_ROOM);
                 entityCounts[fl - 1][rm - 1] = n;
                 for (int e = 0; e < MAX_ENTITIES_PER_ROOM; e++)
                     roomEntities[fl-1][rm-1][e] = ENT_NONE;
                 for (int e = 0; e < n; e++) 
-                    in >> roomEntities[fl-1][rm-1][e]; }
+                    read >> roomEntities[fl-1][rm-1][e]; }
             }
         }
-        in.close();
+        read.close();
         return true;
 }
 void writeGameSummaryReport(const char* filename,
